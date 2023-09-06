@@ -1,9 +1,8 @@
-*helpwriter* *helpwriter.vim* *helpwriter.txt*
+*helpwriter*               A support plugin for writing help files for vim plugins
+*helpwriter.vim* *helpwriter.txt*
 
 License: MIT
 URL: https://github.com/LunarWatcher/helpwriter.vim
-
-Changelog:
 
 ================================================================================
 Table of contents~
@@ -11,6 +10,26 @@ Table of contents~
     1. Table of contents base
 
 ================================================================================
+1. Introduction
 
+Helpfiles are incredibly useful, especially to the end-user. However, they can
+also be useful for customisers, or people who want to try to help develop the
+plugin at any capacity.
+
+Unfortunately, Vim does not make this job particularly easy.
+
+Out of the box, many of the built-in helpfile structures are hard to figure out,
+type, or both. Many of the common styles of help writing also rely on
+multiple types of alignment on one line, particularly in the context of
+headers, which makes them a pain in the ass to write using Vim's built-in
+formatting tools.
+
+As it currently stands, writing helpfiles is a _lot_ of copypasta, a lot of
+manual alignment, and a lot of manual management in general.
+
+This plugin exists to automate or at least reduce the manual work required for
+many of these often tedious tasks, by introducing mappings, structure object
+generation, and maybe even some fancier tools involving automatically generating
+or changing certain types of structure-related text on-demand in the future.
 
 vim:ft=help:tw=80
