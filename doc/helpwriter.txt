@@ -32,4 +32,26 @@ many of these often tedious tasks, by introducing mappings, structure object
 generation, and maybe even some fancier tools involving automatically generating
 or changing certain types of structure-related text on-demand in the future.
 
+================================================================================
+2. Enforced options
+
+Certain options are enforced out of necessity.
+
+This currently only applies to |'textwidth'|.
+Many of the aspects of help files rely on having some document width. To
+generate headers, the header needs a width. There's a built-in facility in Vim
+for this, and as most of the editor experience in help files massively benefit
+form having a textwidth set, this is what helpwriter uses.
+                                                              *textwidth-override*
+                                                   *helpwriter-textwidth-override*
+If |'textwidth'| is undefined, helpwriter automatically sets it to 80.
+'textwidth' is not required to be any particular value, but it is required to be
+non-zero and set.
+
+Should you manually override it after helpwriter defines it, and either unset it
+or set to a non-positive value, the behaviour of helpwriter is undefined. If you
+need to not have 'textwidth' set for help documents, it's better that you don't
+use this plugin.
+
+
 vim:ft=help:tw=80
