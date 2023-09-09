@@ -16,6 +16,8 @@ Table of contents~
         4.2. Default maps ........................... |helpwriter-default-maps|
     5. Features ..................................... |helpwriter-features|
         5.1. Table of content generation ............ |helpwriter-table-of-contents-gen|
+    6. Commands ..................................... |helpwriter-commands|
+    7. Config ....................................... |helpwriter-config|
 
 ================================================================================
 1. Introduction                                          *helpwriter-introduction*
