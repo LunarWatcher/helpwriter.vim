@@ -30,8 +30,6 @@ export def AlignSymbolAndTitle(line: number)
     # cascade down calculations, thanks to a combination of one-indexed and
     # zero-indexed stuff.
     var content = getline(line)
-    # Identify the first tag
-    var tagStart = content->search()
 
     var stars = content->count("*")
     if stars < 2
@@ -72,15 +70,7 @@ export def AlignSymbolAndTitle(line: number)
 
 enddef
 
-export def AddSection()
-    AddSectionHeader("=")
-enddef
-
-export def AddSubsection()
-    AddSectionHeader("-")
-enddef
-
-export def GenerateAndInsertToC()
+export def GenerateAndInsertToC(ask: bool = true)
     var lines = getline(0, line('$'))
     # Where the ToC header starts
     var tocStartLine = -1
@@ -167,16 +157,16 @@ export def GenerateAndInsertToC()
     # + 10 is an optimistic safety factor. The failure conditions for this is
     # very, very specific.
     # TODO: allow bang commands to override this
-    if tocAreaEnd - tocAreaStart > secCount + 10
+    if ask && tocAreaEnd - tocAreaStart > secCount + 10
         echohl WarningMsg
-        echom "WARNING: The ToC area identified may exceed the actual bounds of the table of content."
-        echom "The length of the table exceeds the allowed safety range. Please verify that only the ToC"
-        echom "is within the line range" tocAreaStart "to" tocAreaEnd
+        echo "WARNING: The ToC area identified may exceed the actual bounds of the table of content."
+        echo "The length of the table exceeds the allowed safety range. Please verify that only the ToC"
+        echo "is within the line range" tocAreaStart "to" tocAreaEnd
         echohl None
         var answer = input("Type y to confirm the insertion (note: use the bang command to default yes, or the double bang command to fail automatically): ")
 
         if answer != "y"
-            echom "Aborting"
+            echo "Aborting"
             return
         endif
     endif
@@ -200,7 +190,11 @@ export def GenerateAndInsertToC()
             endif
 
             line ..= title
-            var dotCount = longestSectionName + 24 - line->len()
+            # TODO: hard-coding a number is probably a dumb idea,
+            # but not sure how else to do it. 
+            # &tw - line->len() - longestTagLen - 2 might be an option
+            # (-2 to account for the spaces before and after the dot section)
+            var dotCount = longestSectionName + 15 - line->len()
             line ..= " " .. "."->repeat(dotCount) .. " "
             line ..= tag
 
@@ -232,15 +226,19 @@ def InitPlugMaps()
     # T3: Heavily contextual content that requires certain things about the
     # formatting to be allowed to function.
     nmap <buffer> <Plug>(T3GenToC) :call helpwriter#GenerateAndInsertToC()<CR>
+    nmap <buffer> <Plug>(T3GenToCIgnoreWarnings) :call helpwriter#GenerateAndInsertToC(false)<CR>
 enddef
 
 def InitCommands()
 
     command! AddSectionSeparator call <SID>AddSectionHeader('=')
     command! AddSubsectionSeparator call <SID>AddSectionHeader('-')
+
+    command! -bang GenerateToC call <SID>GenerateAndInsertToC(<bang>true)
 enddef
 
 def InitMaps()
+    # T1 {{{
     nmap <buffer><silent> <leader>ha <Plug>(T1AlignTag)
     # Section abd subsection headers are annoying to deal with. They're not
     # layered, so using \h1 and \h2 doesn't really make sense.
@@ -248,12 +246,16 @@ def InitMaps()
     nmap <buffer><silent> <leader>hsh <Plug>(T1AddSectionSeparator)
     # [prefix] symbol sub[section]
     nmap <buffer><silent> <leader>hss <Plug>(T1AddSubsectionSeparator)
-
+    # }}}
+    # T2 {{{
+    # }}}
+    # T3 {{{
     nmap <buffer><silent> <leader>htg <Plug>(T3GenToC)
+    # }}}
 enddef
 
 export def SetupBuffer()
-    if (&ft != "help")
+    if (&ft != "help" || &ro == true)
         return
     endif
 

@@ -7,10 +7,18 @@ URL: https://github.com/LunarWatcher/helpwriter.vim
 ================================================================================
 Table of contents~
 
-    1. Table of contents base
+    1. Introduction ................................. |helpwriter-introduction|
+        1.1. Tiers .................................. |helpwriter-tiers|
+    2. Enforced options ............................. |helpwriter-enforced-options|
+    3. Syntax definitions for constraints ........... |helpwriter-syntax|
+    4. Mappings ..................................... |helpwriter-maps|
+        4.1. Plug maps .............................. |helpwriter-plug-maps|
+        4.2. Default maps ........................... |helpwriter-default-maps|
+    5. Features ..................................... |helpwriter-features|
+        5.1. Table of content generation ............ |helpwriter-table-of-contents-gen|
 
 ================================================================================
-1. Introduction
+1. Introduction                                          *helpwriter-introduction*
 
 Helpfiles are incredibly useful, especially to the end-user. However, they can
 also be useful for customisers, or people who want to try to help develop the
@@ -32,8 +40,46 @@ many of these often tedious tasks, by introducing mappings, structure object
 generation, and maybe even some fancier tools involving automatically generating
 or changing certain types of structure-related text on-demand in the future.
 
+As an aside, this very help document has been written with the help of this
+plugin, especially its alignment and ToC capabilities.
+
+--------------------------------------------------------------------------------
+1.1. Tiers                                                      *helpwriter-tiers*
+
+Due to the aforementioned enormous flexiblity, it's difficult to make a plugin
+that covers all standards. Consequently, I'm not even going to try. 
+
+Consequently, there are three tiers of features. These tiers exist to make it
+clear what features can be universally applied, and what features can only be
+used in certain documents. This is to make sure the plugin can be used
+everywhere to at least some degree, but using everything everywhere simply isn't
+possible due to the wide array of supported features.
+
+Tier 1~
+Tier 1 features, at most, rely on local context, at most spanning one or two
+lines near the invoked area, but primarily includes zero-context features. 
+
+Examples include adding section and subsection separators, and extended
+alignment features that address concealing.
+
+Tier 2~
+Tier 2 features rely on extended context or document style constraints. They're
+not as strict as tier 3 features, but not as universally applicable as tier 1
+features. 
+
+Tier 3~
+Tier 3 features rely heavily on document context and/or document style
+constraints. They also enforce stricter standards wrt. where the insertions
+happen, or what style the insertions are in. Certain aspects can be tweaked, but
+the default formats are generally restricted to enforce certain standards.
+
+To be clear, the standards the higher tiers use aren't necessarily the best
+standard; they're just the standard I like, and the one I consider sensible.
+This doesn't mean this is the only way to write a help document, but it means
+it's the way I simplified writing in.
+
 ================================================================================
-2. Enforced options
+2. Enforced options                                  *helpwriter-enforced-options*
 
 Certain options are enforced out of necessity.
 
@@ -53,5 +99,120 @@ or set to a non-positive value, the behaviour of helpwriter is undefined. If you
 need to not have 'textwidth' set for help documents, it's better that you don't
 use this plugin.
 
+================================================================================
+3. Syntax definitions for constraints                          *helpwriter-syntax*
+
+HEADER STYLES                                           *helpwriter-header-styles*
+
+                                                    *helpwriter-top-level-headers*
+Top-level headers refer to a line consisting only of = signs, followed by a line
+with text on the left (the actual header text), and a tag on the right.
+As an example, the header for this section meets the criteria. The sections
+don't have to be numbered, but stylistically, it's strongly recommended.
+
+                                                          *helpwriter-subsections*
+Subsections are equivalent to top-level headers, but the symbol line uses -
+instead of =. See section 4.1 (|helpwriter-plug-maps|) for an example.
+To be explicit, subsection headers consist of a line of only - symbols, followed
+by a line with text on the left (the actual header text), and a tag on the
+right.
+
+================================================================================
+4. Mappings                                                      *helpwriter-maps*
+
+--------------------------------------------------------------------------------
+4.1. Plug maps                                              *helpwriter-plug-maps*
+
+Tier 1~
+*<Plug>(T1AddSectionSeparator)*
+    Adds a section separator, i.e. a line consisting only of = symbols, up to
+    'textwidth'
+*<Plug>(T1AddSubsectionSeparator)*
+    Adds a subsection separator, i.e. a line consisting only of - symbols, up to
+    'textwidth'
+*<Plug>(T1AlignTag)*
+    Right-aligns a tag or several tags, either alone on a line or on a header
+    line, in a way that makes it visually display as being within 'textwidth'
+    when concealing is enabled.
+Tier 2~
+None yet
+Tier 3~
+*<Plug>(T3GenToC)*
+    Generates and inserts the ToC. Read |helpwriter-table-of-contents-gen|
+    before using.
+*<Plug>(T3GenToCIgnoreWarnings)*
+    Generates and inserts the ToC. Read |helpwriter-table-of-contents-gen|
+    before using.
+
+    This version of the map skips the warning if the identified ToC area is
+    suspected to exceed the actual ToC area. See also |:GenerateToC!|. Note that
+    the warning involves an interactive prompt, so using the bang version isn't
+    the only way to skip the warning.
+
+    This plug map does not have a default keybind. It's recommended to use the
+    command when overriding automatically is necessary (which should never
+    happen incorrectly in practice; consider opening an issue in the repo
+    instead).
+
+--------------------------------------------------------------------------------
+4.2. Default maps                                        *helpwriter-default-maps*
+
+    <leader>ha          |<Plug>(T1AlignTag)|
+    <leader>hsh         |<Plug>(T1AddSectionSeparator)|
+    <leader>hss         |<Plug>(T1AddSubsectionSeparator)|
+
+    <leader>htg         |<Plug>(T3GenToC)|
+
+================================================================================
+5. Features                                                  *helpwriter-features*
+
+--------------------------------------------------------------------------------
+5.1. Table of content generation                *helpwriter-table-of-contents-gen*
+T3 feature~
+
+How to use~
+Helpwriter looks for one of two headers when looking for the table of contents
+section: "Table of contents" or just "Contents", optionally followed by a ~ to
+make the nice blue headings you see in this section.
+
+Next, it looks for a top-level header (|helpwriter-top-level-headers|), which
+also represents the first header in this document. This area is internally
+defined as the ToC area. As long as this is in place, the ToC generation can
+run.
+
+Note that if the length of the ToC area exceeds the length of the generated ToC
+plus 10 lines, a warning is issued. This is to avoid an overwrite. Vim should be
+able to undo the insertion anyway (and realistically, most help files have git
+history if all else fails). By default, this is handled with a runtime question,
+unless the bang versions of |:GenerateToC| are used, or equivalent maps
+(|helpwriter-toc-maps|) that use the bang versions. See the command help for
+details on the bang versions.
+
+Document style constraints~
+Helpwriter only does sections and subsections. Subsections are not automatically
+listed. Also note that due to how the ToC insertion process works, any manual
+additions to the ToC will be wiped. 
+
+Sections and subsections are defined in accordance to |helpwriter-header-styles|
+
+================================================================================
+6. Commands                                                  *helpwriter-commands*
+
+*:AddSectionSeparator*
+    Same as |<Plug>(T1AddSectionSeparator)|
+*:AddSubsectionSeparator*
+    Same as |<Plug>(T1AddSubsectionSeparator)|
+
+*:GenerateToC* *:GenerateToC!*
+    The non-bang version of this command is the same as |<Plug>(T3GenToC)|.
+
+    The bang version is equivalent to |<Plug>(T3GenToCIgnoreWarnings)|, which
+    ignores a warning about the identified ToC area possibly exceeding the
+    actual ToC area.
+
+================================================================================
+7. Config                                                      *helpwriter-config*
+
+None yet
 
 vim:ft=help:tw=80
