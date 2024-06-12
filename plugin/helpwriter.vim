@@ -9,5 +9,5 @@ import autoload "helpwriter.vim" as hw
 
 augroup HelpWriter
     au!
-    au FileType help call <ScriptCmd>hw.SetupBuffer()
+    au FileType help call <SID>hw.SetupBuffer()
 augroup END
